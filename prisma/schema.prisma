@@ -6,3 +6,46 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(USER)
+  lists     List[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model List {
+  id        Int      @id @default(autoincrement())
+  title     String
+  position  Int      @default(0)
+  ownerId   Int
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  cards     Card[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model Card {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  position    Int       @default(0)
+  dueDate     DateTime?
+  listId      Int
+  list        List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([listId])
+}
